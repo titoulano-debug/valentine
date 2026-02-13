@@ -5,20 +5,25 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Veux-tu être ma Valentine ?</title>
 <style>
-* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; margin:0; padding:0; }
+* { box-sizing: border-box; margin:0; padding:0; -webkit-tap-highlight-color: transparent; }
 
 body {
   height: 100vh; display:flex; justify-content:center; align-items:center; font-family:'Arial', sans-serif;
-  overflow:hidden; background: radial-gradient(circle at 50% 50%, #ff9cc2, #ff4d6d, #ff6699); animation:bgPulse 10s infinite alternate;
+  overflow:hidden;
+
+  /* IMAGE DE FOND */
+  background-image: url("tonimage.png"); /* <-- remplace par ton fichier */
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  position: relative;
 }
 
-@keyframes bgPulse {
-  0% { background-position:0% 50%; }
-  100% { background-position:100% 50%; }
-}
-
+/* voile sombre pour lisibilité */
 body::before {
-  content:""; position:fixed; inset:0; background: rgba(0,0,0,0.25); z-index:0;
+  content:""; position:fixed; inset:0;
+  background: rgba(0,0,0,0.25);
+  z-index:0;
 }
 
 .container {
@@ -47,14 +52,22 @@ button {
 }
 #no:hover { transform: scale(1.1) rotate(5deg); }
 
-.heart {
-  position:fixed; font-size:24px; animation:floatUp 2s linear forwards; pointer-events:none; z-index:1;
-  text-shadow: 0 2px 6px rgba(0,0,0,0.4); transform-origin:center;
+.heart, .particle {
+  position:fixed; pointer-events:none; z-index:1; text-shadow: 0 2px 6px rgba(0,0,0,0.4);
 }
+
+.heart { animation: floatUp 2s linear forwards; font-size:24px; transform-origin:center; }
+.particle { font-size:14px; animation: particleMove linear forwards; }
 
 @keyframes floatUp {
   0% { transform: translateY(0) scale(1) rotate(0deg); opacity:1; }
   100% { transform: translateY(-300px) scale(2) rotate(360deg); opacity:0; }
+}
+
+@keyframes particleMove {
+  0% { transform: translateY(0) scale(1) rotate(0deg); opacity:0; }
+  10% { opacity:1; }
+  100% { transform: translateY(-500px) scale(1.5) rotate(360deg); opacity:0; }
 }
 
 @media(max-width:400px){
@@ -78,6 +91,7 @@ button {
 const yesBtn = document.getElementById('yes');
 const noBtn = document.getElementById('no');
 
+/* Bouton qui fuit */
 function moveNoButton() {
   const padding = 10;
   const maxX = window.innerWidth - noBtn.offsetWidth - padding;
@@ -87,11 +101,13 @@ function moveNoButton() {
   noBtn.style.left = randomX+'px';
   noBtn.style.top = randomY+'px';
 }
-
 noBtn.addEventListener('mouseenter', moveNoButton);
 noBtn.addEventListener('touchstart', e => { e.preventDefault(); moveNoButton(); });
 noBtn.addEventListener('click', moveNoButton);
+moveNoButton();
+window.addEventListener('resize', moveNoButton);
 
+/* Animation au clic "Oui" */
 yesBtn.addEventListener('click', () => {
   for(let i=0;i<50;i++){
     const heart = document.createElement('div');
@@ -110,8 +126,20 @@ yesBtn.addEventListener('click', () => {
   },500);
 });
 
-moveNoButton();
-window.addEventListener('resize', moveNoButton);
+/* Particules animées en continu */
+function createParticles() {
+  const particle = document.createElement('div');
+  particle.classList.add('particle');
+  const emojis = ['🌸','✨','💖','💕','💫'];
+  particle.textContent = emojis[Math.floor(Math.random()*emojis.length)];
+  particle.style.left = Math.random()*window.innerWidth+'px';
+  particle.style.top = window.innerHeight+'px';
+  particle.style.fontSize = (Math.random()*16+12)+'px';
+  particle.style.animationDuration = (5+Math.random()*5)+'s';
+  document.body.appendChild(particle);
+  setTimeout(()=>particle.remove(), 10000);
+}
+setInterval(createParticles, 300); // nouvelle particule toutes les 0.3s
 </script>
 </body>
 </html>
