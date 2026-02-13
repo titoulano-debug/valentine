@@ -30,6 +30,10 @@ button {
 }
 #yes, .answer-btn, #next-btn { background: linear-gradient(45deg,#ff6699,#ff4d6d); color:white; }
 #yes:hover, .answer-btn:hover, #next-btn:hover { transform: scale(1.05) rotate(-1deg); }
+/* Effet pulsation sur le bouton Suivant */
+#next-btn.pulse { animation: pulse 1.2s infinite; }
+@keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.08); } 100% { transform: scale(1); } }
+
 #no, .unreachable { background:#fff; color:#ff4d6d; position:fixed; z-index:3; }
 #no:hover, .unreachable:hover { transform: scale(1.1) rotate(5deg); }
 .heart, .particle, .confetti { position:fixed; pointer-events:none; z-index:1; text-shadow:0 2px 6px rgba(0,0,0,0.4); }
@@ -133,13 +137,15 @@ function transitionToContent(newHTML, callback){
 /* Première question */
 yesBtn.addEventListener('click', ()=>{
   spawnHearts();
+  noBtn.style.display = 'none'; // Bouton "Non" disparaît
   transitionToContent(`
     <h1>🥰 Je savais que tu dirais oui ! 🥰</h1>
     <div class="buttons">
-      <button id="next-btn">Suivant ➡️</button>
+      <button id="next-btn" class="pulse">Suivant ➡️</button>
     </div>
   `, ()=>{
-    document.getElementById('next-btn').addEventListener('click', showSecondQuestion);
+    const nextBtn = document.getElementById('next-btn');
+    nextBtn.addEventListener('click', showSecondQuestion);
   });
 });
 
@@ -180,7 +186,6 @@ function setupSecondQuestion(){
       spawnConfetti(40);
       transitionToContent("<h1>🥰 Trop bien ! Hâte de te voir ! 🥰</h1>");
       const finalText = container.querySelector('h1');
-      // glow effet
       if(finalText){
         finalText.style.textShadow="0 0 20px #ff69b4, 0 0 30px #ff69b4, 0 0 40px #ff69b4, 0 0 50px #ff69b4";
       }
