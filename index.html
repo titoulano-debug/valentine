@@ -11,11 +11,7 @@ body {
   background-image:url("image0.png"); /* Remplace par ton image */
   background-size:cover; background-position:center; background-repeat:no-repeat; position:relative;
 }
-
-body::before {
-  content:""; position:fixed; inset:0; background:rgba(0,0,0,0.25); z-index:0;
-}
-
+body::before { content:""; position:fixed; inset:0; background:rgba(0,0,0,0.25); z-index:0; }
 .container {
   text-align:center; background: rgba(255,255,255,0.15); backdrop-filter: blur(12px);
   padding: 30px 20px; border-radius:24px; box-shadow:0 10px 30px rgba(0,0,0,0.35);
@@ -23,48 +19,27 @@ body::before {
   display:flex; flex-direction:column; gap:20px; transition: all 0.6s ease;
   opacity:1; transform:translateY(0);
 }
-
 .fade-out { opacity:0; transform:translateY(-20px); }
 .fade-in { opacity:1; transform:translateY(0); }
-
-h1 { font-size:clamp(22px,5vw,32px); color:white; text-shadow:0 2px 8px rgba(0,0,0,0.5); }
-
+h1 { font-size:clamp(22px,5vw,32px); color:white; text-shadow:0 2px 8px rgba(0,0,0,0.5); transition:text-shadow 0.5s; }
 .buttons { display:flex; flex-direction:column; gap:15px; align-items:center; }
-
 button {
   border:none; padding:16px 22px; font-size:18px; border-radius:14px;
   cursor:pointer; transition: transform 0.25s ease, background 0.25s ease;
   min-width:180px; touch-action:manipulation; font-weight:bold; position:relative;
 }
-
-#yes, .answer-btn {
-  background: linear-gradient(45deg,#ff6699,#ff4d6d); color:white;
-}
-#yes:hover, .answer-btn:hover { transform: scale(1.05) rotate(-1deg); }
-
-#no, .unreachable {
-  background:#fff; color:#ff4d6d; position:fixed; z-index:3;
-}
+#yes, .answer-btn, #next-btn { background: linear-gradient(45deg,#ff6699,#ff4d6d); color:white; }
+#yes:hover, .answer-btn:hover, #next-btn:hover { transform: scale(1.05) rotate(-1deg); }
+#no, .unreachable { background:#fff; color:#ff4d6d; position:fixed; z-index:3; }
 #no:hover, .unreachable:hover { transform: scale(1.1) rotate(5deg); }
-
-.heart, .particle { position:fixed; pointer-events:none; z-index:1; text-shadow:0 2px 6px rgba(0,0,0,0.4); }
+.heart, .particle, .confetti { position:fixed; pointer-events:none; z-index:1; text-shadow:0 2px 6px rgba(0,0,0,0.4); }
 .heart { animation: floatUp 2s linear forwards; font-size:24px; transform-origin:center; }
 .particle { font-size:14px; animation: particleMove linear forwards; }
-
-@keyframes floatUp {
-  0% { transform: translateY(0) scale(1) rotate(0deg); opacity:1; }
-  100% { transform: translateY(-300px) scale(2) rotate(360deg); opacity:0; }
-}
-@keyframes particleMove {
-  0% { transform: translateY(0) scale(1) rotate(0deg); opacity:0; }
-  10% { opacity:1; }
-  100% { transform: translateY(-500px) scale(1.5) rotate(360deg); opacity:0; }
-}
-
-@media(max-width:400px){
-  .container { padding:25px 15px; }
-  button { font-size:16px; padding:14px 18px; min-width:140px; }
-}
+.confetti { font-size:20px; animation: confettiMove linear forwards; }
+@keyframes floatUp {0% { transform: translateY(0) scale(1) rotate(0deg); opacity:1; }100% { transform: translateY(-300px) scale(2) rotate(360deg); opacity:0; }}
+@keyframes particleMove {0% { transform: translateY(0) scale(1) rotate(0deg); opacity:0; }10% { opacity:1; }100% { transform: translateY(-500px) scale(1.5) rotate(360deg); opacity:0; }}
+@keyframes confettiMove {0% { transform: translateY(0) rotate(0deg); opacity:1; }100% { transform: translateY(600px) rotate(720deg); opacity:0; }}
+@media(max-width:400px){ .container { padding:25px 15px; } button { font-size:16px; padding:14px 18px; min-width:140px; } }
 </style>
 </head>
 <body>
@@ -88,10 +63,8 @@ function moveNoButton() {
   const padding = 10;
   const maxX = window.innerWidth - noBtn.offsetWidth - padding;
   const maxY = window.innerHeight - noBtn.offsetHeight - padding;
-  const randomX = Math.random()*maxX;
-  const randomY = Math.random()*maxY;
-  noBtn.style.left = randomX+'px';
-  noBtn.style.top = randomY+'px';
+  noBtn.style.left = Math.random()*maxX+'px';
+  noBtn.style.top = Math.random()*maxY+'px';
 }
 noBtn.addEventListener('mouseenter', moveNoButton);
 noBtn.addEventListener('touchstart', e => { e.preventDefault(); moveNoButton(); });
@@ -130,14 +103,30 @@ function spawnHearts(count=50){
   }
 }
 
+/* Confettis pour effet final */
+function spawnConfetti(count=30){
+  const colors = ['💛','💚','💙','💜','❤️','🧡'];
+  for(let i=0;i<count;i++){
+    const conf = document.createElement('div');
+    conf.classList.add('confetti');
+    conf.textContent = colors[Math.floor(Math.random()*colors.length)];
+    conf.style.left = Math.random()*window.innerWidth+'px';
+    conf.style.top = '-50px';
+    conf.style.fontSize = (Math.random()*24+16)+'px';
+    conf.style.animationDuration = (3+Math.random()*2)+'s';
+    document.body.appendChild(conf);
+    setTimeout(()=>conf.remove(),3000);
+  }
+}
+
 /* Transition fluide */
-function transitionToContent(newHTML){
+function transitionToContent(newHTML, callback){
   container.classList.add('fade-out');
   setTimeout(()=>{
     container.innerHTML = newHTML;
     container.classList.remove('fade-out');
     container.classList.add('fade-in');
-    setTimeout(()=>container.classList.remove('fade-in'),600);
+    setTimeout(()=>{container.classList.remove('fade-in'); if(callback) callback();},600);
   },500);
 }
 
@@ -147,20 +136,31 @@ yesBtn.addEventListener('click', ()=>{
   transitionToContent(`
     <h1>🥰 Je savais que tu dirais oui ! 🥰</h1>
     <div class="buttons">
+      <button id="next-btn">Suivant ➡️</button>
+    </div>
+  `, ()=>{
+    document.getElementById('next-btn').addEventListener('click', showSecondQuestion);
+  });
+});
+
+/* Deuxième question */
+function showSecondQuestion(){
+  transitionToContent(`
+    <h1>💌 On se voit quand du coup ? 💌</h1>
+    <div class="buttons">
       <button class="answer-btn">Demain avec grand plaisir</button>
       <button class="answer-btn">Demain t'es le plus beau</button>
       <button class="answer-btn">J'attends que toi</button>
       <button class="unreachable">Nique ta mère jvoulais mettre non</button>
     </div>
-  `);
-  setTimeout(setupSecondQuestion,600);
-});
+  `, setupSecondQuestion);
+}
 
-/* Deuxième question */
 function setupSecondQuestion(){
   const unreachable = document.querySelector('.unreachable');
   const answerBtns = document.querySelectorAll('.answer-btn');
 
+  /* Bouton impossible à cliquer */
   function moveUnreachable(){
     const padding=10;
     const maxX=window.innerWidth-unreachable.offsetWidth-padding;
@@ -173,10 +173,17 @@ function setupSecondQuestion(){
   moveUnreachable();
   window.addEventListener('resize', moveUnreachable);
 
+  /* Actions sur vrais boutons */
   answerBtns.forEach(btn=>{
     btn.addEventListener('click', ()=>{
       spawnHearts(30);
+      spawnConfetti(40);
       transitionToContent("<h1>🥰 Trop bien ! Hâte de te voir ! 🥰</h1>");
+      const finalText = container.querySelector('h1');
+      // glow effet
+      if(finalText){
+        finalText.style.textShadow="0 0 20px #ff69b4, 0 0 30px #ff69b4, 0 0 40px #ff69b4, 0 0 50px #ff69b4";
+      }
     });
   });
 }
